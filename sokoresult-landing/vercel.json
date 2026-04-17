@@ -1,0 +1,8 @@
+{
+  "crons": [
+    { "path": "/api/news/ingest",        "schedule": "*/10 * * * *" },
+    { "path": "/api/ai/predict-all",     "schedule": "0 */4 * * *"  },
+    { "path": "/api/ai/suggest-markets", "schedule": "0 */6 * * *"  },
+    { "path": "/api/ai/emotions",        "schedule": "0 */2 * * *"  }
+  ]
+}

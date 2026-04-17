@@ -200,7 +200,7 @@ export async function analyzeAllMarketEmotions(): Promise<
     const topic =
       (market.keywords && market.keywords[0]) ??
       market.question
-        .replace(/^Will |^Is |^Does |\?$/g, "")
+        .replace(/^(Will|Is|Does)\s+|\?$/gi, "")
         .split(" ")
         .slice(0, 4)
         .join(" ");

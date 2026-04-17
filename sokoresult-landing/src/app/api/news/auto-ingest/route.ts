@@ -15,10 +15,8 @@ export const maxDuration = 60;
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const secret = url.searchParams.get("secret");
-  if (
-    secret !== process.env.CRON_SECRET &&
-    process.env.NODE_ENV !== "development"
-  ) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && secret !== cronSecret && process.env.NODE_ENV !== "development") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -66,7 +64,9 @@ export async function GET(request: Request) {
           title:               story.title,
           body:                story.body || cls.summary,
           source_name:         story.source,
-          source_type:         story.sourceType === "mainstream" ? "media" : "contributor",
+          source_type:         story.sourceType === "mainstream" ? "media"
+                           : story.sourceType === "specialized" ? "media"
+                           : "contributor",
           source_url:          story.url,
           image_url:           story.imageUrl,
           category:            cls.category ?? "politics",
@@ -78,15 +78,20 @@ export async function GET(request: Request) {
         });
 
         if (insErr) { errors++; } else { ingested++; }
-        await new Promise((r) => setTimeout(r, 300));
-      } catch { errors++; }
+        await new Promise((r) => setTimeout(r, 500));
+      } catch (storyErr) {
+        console.error("Story processing failed:", (storyErr as Error).message);
+        errors++;
+      }
     }
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("Ingestion failed:", err);
+    return NextResponse.json({ error: "Ingestion failed" }, { status: 500 });
   }
 
   return NextResponse.json({
     ingested, skipped, errors,
+    total: ingested + skipped + errors,
     timestamp: new Date().toISOString(),
     nextRun: "10 minutes",
   });

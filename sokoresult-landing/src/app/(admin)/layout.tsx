@@ -175,7 +175,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (loading) return;
     if (!user) { router.replace("/login"); return; }
     if (!profile) { router.replace("/signup/complete"); return; }
-    if (!(profile as Profile & { is_admin?: boolean }).is_admin) {
+    if (!profile.is_admin) {
       router.replace("/markets");
     }
   }, [user, profile, loading, router]);
@@ -191,7 +191,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  if (!(profile as Profile & { is_admin?: boolean }).is_admin) {
+  if (!profile.is_admin) {
     return null;
   }
 

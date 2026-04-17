@@ -116,7 +116,7 @@ export function EmotionWidget({ marketId }: EmotionWidgetProps) {
       {/* Emotion breakdown */}
       <div className="grid grid-cols-5 gap-2 mb-5">
         {EMOTION_CONFIG.map(({ key, emoji, label, color }) => {
-          const value = Math.round(latest[key as keyof EmotionRecord] as number);
+          const value = Math.round(Number(latest[key as keyof EmotionRecord]) || 0);
           return (
             <div key={key} className="rounded-xl p-2 text-center" style={{ background: "#151520", border: "1px solid #1E1E2E" }}>
               <div className="text-[18px] mb-1">{emoji}</div>
@@ -137,7 +137,7 @@ export function EmotionWidget({ marketId }: EmotionWidgetProps) {
       {latest.sample_posts?.length > 0 && (
         <div className="space-y-2 mb-4">
           {latest.sample_posts.slice(0, 3).map((post, i) => (
-            <div key={i} className="rounded-lg p-3 text-[11px]" style={{ background: "#151520", border: "1px solid #1E1E2E", color: "#8888A0" }}>
+            <div key={post.text.slice(0, 20) || i} className="rounded-lg p-3 text-[11px]" style={{ background: "#151520", border: "1px solid #1E1E2E", color: "#8888A0" }}>
               &ldquo;{post.text}&rdquo;
             </div>
           ))}

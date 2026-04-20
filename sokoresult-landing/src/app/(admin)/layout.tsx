@@ -171,11 +171,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, profile, loading } = useAuth();
   const router = useRouter();
 
+  // DEBUG: surface what the admin gate is actually reading
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log("[AdminLayout] auth state", {
+      loading,
+      firebase_uid: user?.uid,
+      email: user?.email,
+      profile,
+      is_admin: profile?.is_admin,
+      is_admin_type: typeof profile?.is_admin,
+    });
+  }, [user, profile, loading]);
+
   useEffect(() => {
     if (loading) return;
     if (!user) { router.replace("/login"); return; }
     if (!profile) { router.replace("/signup/complete"); return; }
     if (!profile.is_admin) {
+      // eslint-disable-next-line no-console
+      console.warn("[AdminLayout] redirecting: is_admin is falsy", { is_admin: profile.is_admin });
       router.replace("/markets");
     }
   }, [user, profile, loading, router]);
@@ -192,12 +207,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   if (!profile.is_admin) {
-    return null;
+    // DEBUG: show what we read instead of silently redirecting to /markets
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: "#080810" }}>
+        <div className="max-w-md w-full rounded-xl border p-6 text-[13px]" style={{ background: "#12121E", borderColor: "#2A2A3E", color: "#E8E8F0" }}>
+          <div className="text-[15px] font-semibold mb-3" style={{ color: "#FF6B35" }}>
+            Admin check failed
+          </div>
+          <div className="space-y-1 font-mono text-[12px]" style={{ color: "#8888A0" }}>
+            <div>is_admin = <span style={{ color: "#FF5252" }}>{String(profile.is_admin)}</span> (type: {typeof profile.is_admin})</div>
+            <div>firebase_uid = {user.uid}</div>
+            <div>email = {user.email ?? "—"}</div>
+            <div>profile.id = {profile.id}</div>
+          </div>
+          <p className="mt-4 text-[12px]" style={{ color: "#8888A0" }}>
+            Check the <code>profiles</code> row whose <code>firebase_uid</code> matches above and confirm <code>is_admin = true</code>.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <ToastProvider>
-      <AdminShell>{children}</AdminShell>
+      <AdminShell>
+        {/* DEBUG banner — visible confirmation of the value the gate read */}
+        <div className="px-4 md:px-6 py-2 text-[12px] font-mono border-b" style={{ background: "rgba(255,107,53,0.08)", borderColor: "#2A2A3E", color: "#FF6B35" }}>
+          Admin check: is_admin = {String(profile.is_admin)} · uid = {user.uid}
+        </div>
+        {children}
+      </AdminShell>
     </ToastProvider>
   );
 }
